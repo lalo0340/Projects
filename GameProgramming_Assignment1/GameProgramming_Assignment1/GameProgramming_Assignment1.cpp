@@ -12,6 +12,10 @@ HINSTANCE hInst;								// current instance
 static TCHAR szTitle[MAX_LOADSTRING] ;			// The title bar text
 
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
+HBRUSH drawingBrush;
+HPEN drawingPen;
+
+POINT cursorPosition;
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -20,14 +24,14 @@ LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPTSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+					   _In_opt_ HINSTANCE hPrevInstance,
+					   _In_ LPTSTR    lpCmdLine,
+					   _In_ int       nCmdShow)
 {
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
- 	// TODO: Place code here.
+	// TODO: Place code here.
 	MSG msg;
 	HACCEL hAccelTable;
 
@@ -97,22 +101,22 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 //
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-   HWND hWnd;
+	HWND hWnd;
 
-   hInst = hInstance; // Store instance handle in our global variable
+	hInst = hInstance; // Store instance handle in our global variable
 
-   hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
+	hWnd = CreateWindow(szWindowClass, szTitle, WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
 
-   if (!hWnd)
-   {
-      return FALSE;
-   }
+	if (!hWnd)
+	{
+		return FALSE;
+	}
 
-   ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+	ShowWindow(hWnd, nCmdShow);
+	UpdateWindow(hWnd);
 
-   return TRUE;
+	return TRUE;
 }
 
 //
@@ -128,35 +132,149 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
+	
+	BOOLEAN rectum = false;
 	PAINTSTRUCT ps;
 	HDC hdc;
-
+	COLORREF  neutral = 0x9900CC; 
 	switch (message)
 	{
 	case WM_COMMAND:
 		wmId    = LOWORD(wParam);
 		wmEvent = HIWORD(wParam);
 		// Parse the menu selections:
+
 		switch (wmId)
 		{
 		case IDM_ABOUT:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
+
+		case IDM_BLUE:
+			{
+			COLORREF blue =RGB (0,0,255); 
+		
+				drawingPen = CreatePen(PS_DASHDOT,10, blue);
+			}
+			break;
+		case IDM_PURPLE:
+			{
+			COLORREF purple = RGB (204,0,204);
+			
+				drawingPen = CreatePen(PS_DASHDOT,10, purple);
+			}
+			break;
+		case IDM_GREEN:
+			{
+			COLORREF green = RGB (0,255,0);
+		
+				drawingPen = CreatePen(PS_DASHDOT,10, green);
+
+			
+			}
+			break;
+
+		case IDM_RED:
+			{
+				COLORREF red = RGB (255,0,0);
+				drawingPen = CreatePen(PS_DASHDOT,10, red);
+				neutral = red;
+				return red;
+			}
+			break;
+		case IDM_PEN:
+			{
+		//COLORREF blue = 0x00FF0000;
+		//	drawingPen = CreatePen(PS_DASHDOT,10, blue);
+			}
+			break;
+
+		case IDM_ELLIPSE:
+			rectum = true;
+			UpdateWindow(hWnd);
+			InvalidateRect(hWnd, NULL, FALSE);
+			
+			//RedrawWindow(hWnd,NULL,NULL,RDW_ALLCHILDREN | RDW_UPDATENOW);
+			break;
+
+		case IDM_RECTANGLE :
+			break;
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
 			break;
+
+
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
 		break;
 	case WM_PAINT:
+		{
+
+
 		hdc = BeginPaint(hWnd, &ps);
+		
+	
+			RECT clientRect;
+			GetClientRect(hWnd, &clientRect);
 		// TODO: Add any drawing code here...
+
+			int screenWidth = clientRect.right - clientRect.left ;
+			int screenHeight =  clientRect.bottom - clientRect.top ;
+
+		HDC backbufferDC = CreateCompatibleDC(hdc);
+		HBITMAP backBufferBmp = CreateCompatibleBitmap(hdc,screenWidth, screenHeight );
+
+
+		SelectObject (backbufferDC, backBufferBmp);
+
+		SelectObject(backbufferDC,drawingPen);
+		MoveToEx (backbufferDC,cursorPosition.x,cursorPosition.y,NULL);
+		LineTo(backbufferDC,cursorPosition.x,cursorPosition.y);
+
+		if(rectum == true) {
+		Ellipse (backbufferDC, cursorPosition.x, cursorPosition.y, 100,500);
+		}
+		BitBlt(hdc, 0,0,screenWidth, screenHeight, backbufferDC,0,0, SRCCOPY);
+
+		DeleteObject(backBufferBmp);
+		DeleteDC (backbufferDC);
+		//	Rectangle(hdc,10,200,300,40);
+
 		EndPaint(hWnd, &ps);
+		}
+		break;
+	case WM_LBUTTONDOWN:
+
+		
 		break;
 
-	
+	case WM_MOUSEMOVE:
+		{
+			cursorPosition.x = LOWORD(lParam);
+			cursorPosition.y = HIWORD(lParam);
+			RECT clientRect;
+			GetClientRect(hWnd, &clientRect);
+			InvalidateRect(hWnd,&clientRect, false);
+		}
+		break;
+
+	case WM_CREATE:
+		{
+			COLORREF blue = 0x00FF0000;
+			COLORREF black = 0x0;
+			drawingPen = CreatePen(PS_DASHDOTDOT,10, neutral);
+
+		//	drawingBrush = CreateSolidBrush (black);
+		}
+		break;
+
+
 	case WM_DESTROY:
+
+		DeleteObject(drawingPen);
+		DeleteObject(drawingBrush);
+		
 		PostQuitMessage(0);
 		break;
 	default:
