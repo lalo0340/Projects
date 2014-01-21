@@ -16,6 +16,7 @@ HBRUSH drawingBrush;
 HPEN drawingPen;
 POINT End;
 POINT cursorPosition;
+UINT color = NULL;
 
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
@@ -132,11 +133,11 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
-
+	
 	BOOLEAN rectum = false;
 	PAINTSTRUCT ps;
 	HDC hdc;
-	COLORREF  neutral = 0x9900CC; 
+	COLORREF  neutral = RGB (0,0,255); 
 	switch (message)
 	{
 	case WM_COMMAND:
@@ -155,6 +156,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				COLORREF blue =RGB (0,0,255); 
 
 				drawingPen = CreatePen(PS_DASHDOT,10, blue);
+				switch (color) {
+
+				case 1: 
+				
+					drawingPen = CreatePen(PS_DASHDOT,5, blue);
+						return 1;
+					break;
+				case 2:
+					
+						drawingPen = CreatePen(PS_DASHDOT,15, blue);
+						return 2;
+					break;
+				case 3:
+					
+						drawingPen = CreatePen(PS_DASHDOT,70, blue);
+						return 3;
+					break;
+				default: 
+					return 2;
+					break;
+
+
+				}
 			}
 			break;
 		case IDM_PURPLE:
@@ -162,6 +186,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				COLORREF purple = RGB (204,0,204);
 
 				drawingPen = CreatePen(PS_DASHDOT,10, purple);
+					switch (color) {
+
+				case 1: 
+				
+					drawingPen = CreatePen(PS_DASHDOT,5, purple);
+						return 1;
+					break;
+				case 2:
+					
+						drawingPen = CreatePen(PS_DASHDOT,15, purple);
+						return 2;
+					break;
+				case 3:
+					
+						drawingPen = CreatePen(PS_DASHDOT,70, purple);
+						return 3;
+					break;
+				default: 
+					return 2;
+					break;
+
+
+				}
 			}
 			break;
 
@@ -171,7 +218,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				COLORREF green = RGB (0,255,0);
 				drawingBrush = CreateSolidBrush (green);
 				drawingPen = CreatePen(PS_DASHDOT,10, green);
+					switch (color) {
 
+				case 1: 
+				
+					drawingPen = CreatePen(PS_DASHDOT,5, green);
+						return 1;
+					break;
+				case 2:
+					
+						drawingPen = CreatePen(PS_DASHDOT,15, green);
+						return 2;
+					break;
+				case 3:
+					
+						drawingPen = CreatePen(PS_DASHDOT,70, green);
+						return 3;
+					break;
+				default: 
+					return 2;
+					break;
+
+
+				}
 
 			}
 			break;
@@ -181,7 +250,31 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				COLORREF red = RGB (255,0,0);
 				drawingPen = CreatePen(PS_DASHDOT,10, red);
 				neutral = red;
-				return red;
+				switch (color) {
+
+				case 1: 
+				
+					drawingPen = CreatePen(PS_DASHDOT,5, red);
+						return 1;
+					break;
+				case 2:
+					
+						drawingPen = CreatePen(PS_DASHDOT,15, red);
+						return 2;
+					break;
+				case 3:
+					
+						drawingPen = CreatePen(PS_DASHDOT,70, red);
+						return 3;
+					break;
+				default: 
+					return 2;
+					break;
+
+
+				}
+
+				//return neutral;
 			}
 			break;
 		case IDM_PEN:
@@ -216,15 +309,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 
 		case IDM_SMALL:
-
-			drawingPen = CreatePen(PS_DASHDOT,5, neutral);
+			color = 1;
 			break;
-
 		case IDM_MEDIUM:
-			drawingPen = CreatePen (PS_DASHDOT,10, neutral);
+			color = 2;
 			break;
 		case IDM_LARGE :
-			drawingPen = CreatePen (PS_DASHDOT,20,neutral);
+			color = 3;
 			break;
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
