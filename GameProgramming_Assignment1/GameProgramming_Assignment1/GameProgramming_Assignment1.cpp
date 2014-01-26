@@ -14,21 +14,24 @@ static TCHAR szTitle[MAX_LOADSTRING] ;			// The title bar text
 TCHAR szWindowClass[MAX_LOADSTRING];			// the main window class name
 HBRUSH drawingBrush;
 HPEN drawingPen;
+HPEN finalPen;
 POINT End;
 POINT cursorPosition;
 UINT color = NULL;
 UINT easteregg =  NULL;
-UINT startx = NULL;
-UINT starty = NULL;
 
 POINT final;
-UINT finalx = NULL;
-UINT finaly = NULL;
+
+HDC backbufferDC;
+HBITMAP backbufferBitmap;
+COLORREF currentPenColour;
+UINT brushtype = NULL;
 // Forward declarations of functions included in this code module:
 ATOM				MyRegisterClass(HINSTANCE hInstance);
 BOOL				InitInstance(HINSTANCE, int);
 LRESULT CALLBACK	WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	About(HWND, UINT, WPARAM, LPARAM);
+
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
 					   _In_opt_ HINSTANCE hPrevInstance,
@@ -87,7 +90,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 	wcex.cbWndExtra		= 0;
 	wcex.hInstance		= hInstance;
 	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_GAMEPROGRAMMING_ASSIGNMENT1));
-	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
+	wcex.hCursor		= LoadCursor(NULL, IDC_CROSS);
 	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
 	wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_GAMEPROGRAMMING_ASSIGNMENT1);
 	wcex.lpszClassName	= szWindowClass;
@@ -140,7 +143,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int wmId, wmEvent;
 
-	BOOLEAN rectum = false;
+
 	PAINTSTRUCT ps;
 	HDC hdc;
 	COLORREF  neutral = RGB (0,0,255); 
@@ -157,26 +160,36 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
 
+			/*****************************************************************************************
+			*****************************************************************************************
+			*****************************************************************************************
+			Switch case for the color drop menu for color BLUE
+			Returns : 1-3
+
+			*****************************************************************************************
+			*****************************************************************************************
+			*****************************************************************************************/
+
 		case IDM_BLUE:
 			{
 				COLORREF blue =RGB (0,0,255); 
 
-				drawingPen = CreatePen(PS_DASHDOT,10, blue);
+				drawingPen = CreatePen(PS_ENDCAP_SQUARE,10, blue);
 				switch (color) {
 
 				case 1: 
 
-					drawingPen = CreatePen(PS_DASHDOT,5, blue);
+					drawingPen = CreatePen(PS_ENDCAP_SQUARE,5, blue);
 					return 1;
 					break;
 				case 2:
 
-					drawingPen = CreatePen(PS_DASHDOT,15, blue);
+					drawingPen = CreatePen(PS_ENDCAP_SQUARE,15, blue);
 					return 2;
 					break;
 				case 3:
 
-					drawingPen = CreatePen(PS_DASHDOT,70, blue);
+					drawingPen = CreatePen(PS_ENDCAP_SQUARE,70, blue);
 					return 3;
 					break;
 				default: 
@@ -187,22 +200,33 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				}
 			}
 			break;
+
+			/*****************************************************************************************
+			*****************************************************************************************
+			*****************************************************************************************
+			Switch case for the color drop menu for color PURPLE
+			Returns : 1-3
+
+			*****************************************************************************************
+			*****************************************************************************************
+			*****************************************************************************************/
+
 		case IDM_PURPLE:
 			{
 				COLORREF purple = RGB (204,0,204);
 
-				drawingPen = CreatePen(PS_DASHDOT,10, purple);
+				drawingPen = CreatePen(PS_ENDCAP_SQUARE,10, purple);
 				switch (color) {
 				case 1: 
-					drawingPen = CreatePen(PS_DASHDOT,5, purple);
+					drawingPen = CreatePen(PS_ENDCAP_SQUARE,5, purple);
 					return 1;
 					break;
 				case 2:
-					drawingPen = CreatePen(PS_DASHDOT,15, purple);
+					drawingPen = CreatePen(PS_ENDCAP_SQUARE,15, purple);
 					return 2;
 					break;
 				case 3:
-					drawingPen = CreatePen(PS_DASHDOT,70, purple);
+					drawingPen = CreatePen(PS_ENDCAP_SQUARE,70, purple);
 					return 3;
 					break;
 				default: 
@@ -212,29 +236,41 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 				}
 			}
+			
 			break;
+
+
+			/*****************************************************************************************
+			*****************************************************************************************
+			*****************************************************************************************
+			Switch case for the color drop menu for color GREEN
+			Returns : 1-3
+
+			*****************************************************************************************
+			*****************************************************************************************
+			*****************************************************************************************/
 
 
 		case IDM_GREEN:
 			{
 				COLORREF green = RGB (0,255,0);
 				drawingBrush = CreateSolidBrush (green);
-				drawingPen = CreatePen(PS_DASHDOT,10, green);
+				drawingPen = CreatePen(PS_ENDCAP_SQUARE,10, green);
 				switch (color) {
 
 				case 1: 
 
-					drawingPen = CreatePen(PS_DASHDOT,5, green);
+					drawingPen = CreatePen(PS_ENDCAP_SQUARE,5, green);
 					return 1;
 					break;
 				case 2:
 
-					drawingPen = CreatePen(PS_DASHDOT,15, green);
+					drawingPen = CreatePen(PS_ENDCAP_SQUARE,15, green);
 					return 2;
 					break;
 				case 3:
 
-					drawingPen = CreatePen(PS_DASHDOT,70, green);
+					drawingPen = CreatePen(PS_ENDCAP_SQUARE,70, green);
 					return 3;
 					break;
 				default: 
@@ -247,71 +283,57 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 
-			/*
+			/*****************************************************************************************
+			*****************************************************************************************
+			*****************************************************************************************
 			Switch case for the color drop menu for color RED
 			Returns : 1-3
-			
 
-			*/
+			*****************************************************************************************
+			*****************************************************************************************
+			*****************************************************************************************/
 
 		case IDM_RED:
 			{
 				COLORREF red = RGB (255,0,0); //creates the color reference to RGB red
-				drawingPen = CreatePen(PS_DASHDOT,10, red); //creates and initializes the drawing pen (by default)
-			switch (color) {
+				drawingPen = CreatePen(PS_ENDCAP_SQUARE,10, red); //creates and initializes the drawing pen (by default)
+				switch (color) {
 
 				case 1: //small
-					drawingPen = CreatePen(PS_DASHDOT,5, red);
+					drawingPen = CreatePen(PS_ENDCAP_SQUARE,5, red);
 					return 1;//return unsigned int 1 for size
 					break;
 				case 2: //medium
 
-					drawingPen = CreatePen(PS_DASHDOT,15, red);
+					drawingPen = CreatePen(PS_ENDCAP_SQUARE,15, red);
 					return 2;//return unsigned int 2 for size
 					break;
 				case 3: //large
 
-					drawingPen = CreatePen(PS_DASHDOT,70, red);
+					drawingPen = CreatePen(PS_ENDCAP_SQUARE,70, red);
 					return 3; //return unsigned int 3 for size
 					break;
 				default: 
 					return 2; //return default size...2
 					break;
-
-
 				}
 
-				//return neutral;
 			}
 			break;
 		case IDM_PEN:
 			{
-				//COLORREF blue = 0x00FF0000;
-				//	drawingPen = CreatePen(PS_DASHDOT,10, blue);
+			brushtype = 1;
 			}
 			break;
 
 		case IDM_ELLIPSE:
 			{
-				//rectum = true;
-
-				hdc = BeginPaint(hWnd, &ps);
-				//		RECT clientRect;
-				//		GetClientRect(hWnd, &clientRect);
-				///		int screenWidth = clientRect.right - clientRect.left ;
-				//		int screenHeight =  clientRect.bottom - clientRect.top ;
-
-
-				//	UpdateWindow(hWnd);
-				//	InvalidateRect(hWnd,&clientRect, true);
-
-				Ellipse (hdc, cursorPosition.x, cursorPosition.y, 100,500);
-
+				brushtype = 2;
 			}
 			break;
 
 		case IDM_RECTANGLE :
-			rectum = true;
+			brushtype = 3;
 			break;
 
 
@@ -328,7 +350,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		case IDM_LARGE :
 			color = 3;
-				easteregg+= color;
+			easteregg+= color;
 			break;
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
@@ -341,122 +363,198 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_PAINT:
 		{
-			rectum = true;
 
 			hdc = BeginPaint(hWnd, &ps);
-
-
-
-			RECT clientRect;
-			GetClientRect(hWnd, &clientRect);
 			// TODO: Add any drawing code here...
+			switch (brushtype) {
 
-			int screenWidth = clientRect.right - clientRect.left ;
-			int screenHeight =  clientRect.bottom - clientRect.top ;
+				/******************************
+				*******************************
+				*When User selects Pen Tool****
+				******************************/
+			case 1: 
+				{
+					RECT clientArea;
+					GetClientRect(hWnd, &clientArea);
+					int screenWidth = clientArea.right - clientArea.left;
+					int screenHeight = clientArea.bottom - clientArea.top;
 
-			HDC backbufferDC = CreateCompatibleDC(hdc);
-			HBITMAP backBufferBmp = CreateCompatibleBitmap(hdc,screenWidth, screenHeight );
+					backbufferDC = CreateCompatibleDC(hdc);
+					backbufferBitmap = CreateCompatibleBitmap(hdc, screenWidth, screenHeight);
+					SelectObject(backbufferDC, backbufferBitmap);
+
+					HGDIOBJ previousPen = SelectObject(backbufferDC, drawingPen);
+					SelectObject(backbufferDC, drawingBrush);
+
+					MoveToEx(backbufferDC, cursorPosition.x, cursorPosition.y, NULL);
+					LineTo(backbufferDC, End.x, End.y);
+
+					SelectObject(backbufferDC, previousPen);
+					BitBlt(hdc, 0, 0, screenWidth, screenHeight, backbufferDC, 0, 0, SRCCOPY);
+				}
+				break;
+
+				/**********************************
+				***********************************
+				*When User selects Ellipse Tool****
+				***********************************/
+			case 2:
+				{
+					RECT clientArea;
+					GetClientRect(hWnd, &clientArea);
+					int screenWidth = clientArea.right - clientArea.left;
+					int screenHeight = clientArea.bottom - clientArea.top;
+
+					backbufferDC = CreateCompatibleDC(hdc);
+					backbufferBitmap = CreateCompatibleBitmap(hdc, screenWidth, screenHeight);
+
+					SelectObject(backbufferDC, backbufferBitmap);
+					HGDIOBJ previousPen = SelectObject(backbufferDC, drawingPen);
+					SelectObject(backbufferDC, drawingBrush);
+
+					Ellipse(backbufferDC,cursorPosition.x,cursorPosition.y,End.x,End.y);
+					SelectObject(backbufferDC, previousPen);
+
+					BitBlt(hdc, 0, 0, screenWidth, screenHeight, backbufferDC, 0, 0, SRCCOPY);
+				}
+				break;
 
 
+				/************************************
+				*************************************
+				*When User selects Rectangle Tool****
+				*************************************/
+			case 3:
+				{
 
-			SelectObject (backbufferDC, backBufferBmp);
-			//Ellipse (backbufferDC, cursorPosition.x, cursorPosition.y, cursorPosition.x,cursorPosition.y);
-			SelectObject(backbufferDC,drawingPen);
-			MoveToEx (backbufferDC,cursorPosition.x,cursorPosition.y,NULL);
-			LineTo(backbufferDC,cursorPosition.x,cursorPosition.y);
+					RECT clientArea;
+					GetClientRect(hWnd, &clientArea);
+					int screenWidth = clientArea.right - clientArea.left;
+					int screenHeight = clientArea.bottom - clientArea.top;
+					
+					backbufferDC = CreateCompatibleDC(hdc);
+					backbufferBitmap = CreateCompatibleBitmap(hdc, screenWidth, screenHeight);
+					SelectObject(backbufferDC, backbufferBitmap);
+					HGDIOBJ previousPen = SelectObject(backbufferDC, drawingPen);
+					SelectObject(backbufferDC, drawingBrush);
+
+					Rectangle(backbufferDC,cursorPosition.x,cursorPosition.y,End.x,End.y);
+			
+					
+					SelectObject(backbufferDC, previousPen);
+					BitBlt(hdc, 0, 0, screenWidth, screenHeight, backbufferDC, 0, 0, SRCCOPY);
+				}
+				break;
 
 
-			//	Rectangle(backbufferDC,10,200,300,40);
+				/**********************************
+				***********************************
+				***Pen Tool is Default on Launch****
+				***********************************/
+			default:
+				{
+					RECT clientArea;
+					GetClientRect(hWnd, &clientArea);
+					int screenWidth = clientArea.right - clientArea.left;
+					int screenHeight = clientArea.bottom - clientArea.top;
+					
+					backbufferDC = CreateCompatibleDC(hdc);
+					backbufferBitmap = CreateCompatibleBitmap(hdc, screenWidth, screenHeight);
+					
+					SelectObject(backbufferDC, backbufferBitmap);
+					
+					HGDIOBJ previousPen = SelectObject(backbufferDC, drawingPen);
+					SelectObject(backbufferDC, drawingBrush);
+					
+					MoveToEx(backbufferDC, cursorPosition.x, cursorPosition.y, NULL);
+					LineTo(backbufferDC, End.x, End.y);
+					
+					SelectObject(backbufferDC, previousPen);
+					BitBlt(hdc, 0, 0, screenWidth, screenHeight, backbufferDC, 0, 0, SRCCOPY);
+				}
+				break;
+			}
 
-			BitBlt(hdc, 0,0,screenWidth, screenHeight, backbufferDC,0,0, SRCCOPY);
-
-
-			DeleteObject(backBufferBmp);
-			DeleteDC (backbufferDC);
 
 			EndPaint(hWnd, &ps);
+
 		}
 		break;
 
 
 	case WM_LBUTTONDOWN:
 		{
-			 startx = cursorPosition.x;
-			 starty = cursorPosition.y;
-			 	RECT clientRect;
-			GetClientRect(hWnd, &clientRect);
-			 InvalidateRect(hWnd,&clientRect, false);
-			hdc = BeginPaint(hWnd, &ps);
-			rectum=true;
-			
+
+			switch (brushtype) {
+
+			case 1:  //pen
+
+				{
+					cursorPosition.x = LOWORD(lParam);
+					cursorPosition.y = HIWORD(lParam);
+
+					End.x = LOWORD(lParam);
+					End.y = HIWORD(lParam);
+					InvalidateRect(hWnd, NULL, false);
+
+				}
+				break;
+
+			case 2: //ellipse
+				{
+					cursorPosition.x = LOWORD(lParam);
+					cursorPosition.y = HIWORD(lParam);
+
+					End.x = LOWORD(lParam);
+					End.y = HIWORD(lParam);
+		
+				}
+				break;
+
+			case 3: //rectangle
+				break;
+			default :
+					cursorPosition.x = LOWORD(lParam);
+					cursorPosition.y = HIWORD(lParam);
+
+					End.x = LOWORD(lParam);
+					End.y = HIWORD(lParam);
+					InvalidateRect(hWnd, NULL, false);
+
+				break;
+			}
 
 		}
 		break;
 
-			case WM_LBUTTONUP:
-
-			finalx = End.x;
-			finaly = End.y;
 
 
+	case WM_LBUTTONUP:
+		{
+			/*hdc = BeginPaint(hWnd, &ps);
+			SelectObject(hdc,finalPen);
+			MoveToEx(hdc, 300, 50, NULL);
+			LineTo(hdc, 500, 300); */
+		}
 
 		break;
 
 	case WM_MOUSEMOVE:
 		{
-		hdc = BeginPaint(hWnd, &ps);
+			if(wParam == MK_LBUTTON)
+			{
+				End.x = LOWORD(lParam);
+				End.y = HIWORD(lParam);
+				InvalidateRect(hWnd, NULL, false);
 
-
-			RECT clientRect;
-			GetClientRect(hWnd, &clientRect);
-			InvalidateRect(hWnd,&clientRect, false);
-			cursorPosition.x=LOWORD(lParam);
-			cursorPosition.y=HIWORD(lParam);
-
-			End.x=LOWORD(lParam);
-			End.y=HIWORD(lParam);
-		//	Rectangle(hdc,startx,starty,End.x,End.y);
-		
-
-
-
-		
-			// TODO: Add any drawing code here...
-
-			int screenWidth = clientRect.right - clientRect.left ;
-			int screenHeight =  clientRect.bottom - clientRect.top ;
-
-			HDC backbufferDC = CreateCompatibleDC(hdc);
-			HBITMAP backBufferBmp = CreateCompatibleBitmap(hdc,screenWidth, screenHeight );
-
-
-
-			SelectObject (backbufferDC, backBufferBmp);
-			//Ellipse (backbufferDC, cursorPosition.x, cursorPosition.y, cursorPosition.x,cursorPosition.y);
-			SelectObject(backbufferDC,drawingPen);
-			MoveToEx (backbufferDC,startx,starty,NULL);
-			LineTo(backbufferDC,End.x,End.y);
-
-
-			//	Rectangle(backbufferDC,10,200,300,40);
-
-			BitBlt(hdc, 0,0,screenWidth, screenHeight, backbufferDC,0,0, SRCCOPY);
-
-
-			DeleteObject(backBufferBmp);
-			DeleteDC (backbufferDC);
-
+			}
 		}
 		break;
 
 	case WM_CREATE:
 		{
-			//	hdc = BeginPaint(hWnd, &ps);
-			COLORREF blue = 0x00FF0000;
-			COLORREF black = 0x0;
-			drawingPen = CreatePen(PS_DASHDOTDOT,10, neutral);
-			//	Ellipse (hdc, cursorPosition.x, cursorPosition.y, 100,500);
-			//	drawingBrush = CreateSolidBrush (neutral);
+			drawingPen = CreatePen(PS_ENDCAP_SQUARE,10, neutral);
+			finalPen=CreatePen(PS_ENDCAP_FLAT,20,neutral);
 		}
 		break;
 
@@ -493,3 +591,4 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	return (INT_PTR)FALSE;
 }
+
